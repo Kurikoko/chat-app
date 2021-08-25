@@ -4,6 +4,8 @@ class MessagesController < ApplicationController
     @message = Message.new
     # ルーティングのネストから親Roomモデルのidパラメーター取得し、そのidのレコードのみインスタンス変数へ格納
     @room = Room.find(params[:room_id])
+    # ルームのコメントを全て取得、ユーザー情報はN+1問題回避の為にincludes
+    @messages = @room.messages.includes(:user)
   end
 
   def create
@@ -15,6 +17,9 @@ class MessagesController < ApplicationController
     if @message.save
       redirect_to room_messages_path(@room)
     else 
+      # indexアクションが起きないのでここで@messagesを定義
+      @messages = @room.messages.includes(:user)
+      # 情報を保持したままindexに戻る
       render :index
     end
   end
